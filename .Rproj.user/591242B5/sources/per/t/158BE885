@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1569848229476.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2291411364",
+    "id" : "158BE885",
+    "lastKnownWriteTime" : 1569848637,
+    "last_content_update" : 1569848637054,
+    "path" : "C:/Dropbox/github/prob_ra/R/prob_ra.R",
+    "project_path" : "R/prob_ra.R",
+    "properties" : {
+        "cursorPosition" : "82,0",
+        "scrollLine" : "68"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

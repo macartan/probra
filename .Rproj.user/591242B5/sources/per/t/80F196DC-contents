@@ -1,0 +1,116 @@
+---
+title: "Bistochastic"
+author: "M"
+date: "March 8, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Generate a random matrix with cols summing to integers and rows summing to 1
+
+Check distributions from prob_ra
+
+
+
+# The function
+
+The basic function works by doing systematic sampling over a random (but block preserving) order.
+
+```{r}
+.prob_ra <- function(p = .5, 
+                  b = NULL, 
+                  n = NULL,
+                  tol = 10){
+  # Housekeeping
+  
+  if(is.null(n)) {if(!is.null(b)) n <- length(b)
+                  if( is.null(b) & length(p)>1)  n <- length(p)}
+  if(length(p) == 1) p <- rep(p, n)
+  if(is.null(b))     b <- rep(1, n)
+  p   <- round(p, tol)  
+  m   <- ceiling(sum(p))
+  
+  if(m == 0) return(rep(0, length(p)))
+  
+  # Figure out if we have to deal with a random total
+  tag <- m > floor(sum(p))
+    
+  if(tag){
+    p <- c(p, ceiling(sum(p)) - sum(p))
+    n <- n+1
+    b <- c(b, ".dummy")
+    }  
+
+  base <- p - p%%1
+  p <- p - base 
+  
+  # randomly order blocks then reorder within blocks
+  b_names   <- unique(b)
+  k         <- length(b_names)
+  seq1      <- rep(NA, length(b))
+  b_shuffle <- sample(1:k)
+  for(j in 1:k) seq1[b==b_names[j]] <- b_shuffle[j]
+  seq2      <- rank(seq1 + runif(n))
+  p[seq2]   <- p
+  
+  # Now  do systematic assignment
+  s   <- (cumsum(p) +m*runif(1))%%m
+  e   <- s - floor(s)
+  out <- 1*(e < c(e[n], e[-n]))
+  out <- out[seq2]
+  out <- out + base
+  if(tag) out <- out[-n]
+  return(out)
+}
+```
+
+The more general function applies this for each treatment:
+
+
+```{r}
+prob_ra <- function(p = .5, 
+                  b = NULL, 
+                  n = NULL){
+
+if(is.null(ncol(p))) {Z <- .prob_ra(p, b, n)
+} else {
+Z <- matrix(NA, nrow(p), ncol(p))
+Z[,1] <- .prob_ra(p[,1],b,n)
+
+for(j in 2:ncol(p)){
+  q <- p[,j]
+  q[apply(Z, 1, sum, na.rm = TRUE)==1] <- 0
+  q <- q/(1-apply(as.matrix(p[,1:(j-1)]), 1, sum, na.rm = TRUE))  
+  q[is.nan(q)] <- 0
+  Z[,j] <- .prob_ra(as.vector(q), b, n)
+  }
+Z <-Z%*%matrix(1:ncol(p),ncol(p))
+}
+Z}
+
+```
+
+
+```{r}
+library(gtools)
+
+random_design <- function (m, k){
+  a  <- function(x) {ceiling(apply(x, 2, sum)) - apply(x, 2, sum)}
+  x  <- rdirichlet(m, rep(1, k))
+  while(sum(a(x)>0)) {x <- rbind(x,  a(x)/sum(a(x)))}
+  x}
+
+test <- random_design(100, 4)
+
+sims = 100
+runs <- sapply(1:sims, function(j) prob_ra(p = test))
+
+# Shares in each condition
+
+for(j in 1:ncol(test)){
+print(table(apply(runs==j, 2, sum))/ncol(runs))
+}
+

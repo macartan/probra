@@ -1,0 +1,258 @@
+---
+title: "Systematic load balancing block randomization for arbitrary individual assignment probabilities"
+author: "Macartan Humphreys"
+date: "September 2019"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Put the title of your vignette here}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+
+```{r setup, include=FALSE}
+rm(list = ls())
+knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
+library(probra)
+```
+
+
+Description of a randomization function that handles heterogeneous probabilities and awkward integer blocks sizes. 
+
+Two illustrations of functionality made possible with this function. 
+
+1: Jack and Jill have a race. Jill is faster than Jack and has a higher probability of winning. You want to simulate a distribution of wins. This is a situation where probabilites are heterogeneous and in which there is a target number of  units to  be selected. This problem is neither simple nor complete, as understood by `randomizr`.
+
+2: You have 2 districts with 3 villages each. You want to assign 3 villages to treatment, blocking by district, and with equal probabilities for all units. This randomization requires an allocation both across and within blocks.  More generally, the issues here is that the target number to be assigned in a given block is not an integer.
+
+These problems can both occur in a given problem and indeed you would expect them to whenever there are generic probabilities and blocks.
+
+# Illustration: One arm
+
+With random data:
+
+```{r}
+s    <- 100
+prob    <- runif(s)
+blocks    <- sample(1:5, s, replace = TRUE, prob = 1:5)
+sims <- 10000
+runs <- replicate(sims, prob_ra(prob, blocks))
+```
+
+
+## Total selected is as tight as possible
+
+There should only be a unit difference between the totals assigned in any set of runs:
+
+```{r}
+table(apply(runs, 2, sum))
+```
+
+## Total selected *in each block*  is also as tight as possible
+
+Should be only max 1 unit between min and max
+
+```{r}
+bin_dist <- apply(runs, 2, function(j) table(blocks, j)[,2])
+table_check <- t(rbind(apply(bin_dist, 1, function(j)  c(mean(j), min(j), max(j)))))
+colnames(table_check) <- c("sim_p", "min", "max")
+```
+
+
+```{r}
+kable(round(cbind(size = table(blocks), true_p = aggregate(prob, by = list(blocks), FUN = sum)[,2], table_check), 2))
+```
+
+## True assignment probabilities are respected at the lowest level
+```{r}
+plot(prob, apply(runs, 1, mean), xlim = c(0,1), ylim = c(0,1))
+abline(0,1)
+```
+
+# Illustration: Multiple arms
+
+The function can also be used sequentially for multiple treatment. In this case it implements the based treatment in a  *hierarchical* manner, which preserves individual probabilities, but prioritizes  balancing by order.
+
+## Multiple Treatments Illustration 
+
+```{r}
+s  <- 100
+blocks  <- sample(1:5, s, replace = TRUE, prob = 1:5)
+p1 <- runif(s)
+p2 <- runif(s)*(1-p1)
+prob <- cbind(p1,p2)
+```
+
+Note that t2 will be systematic, like t1, *given* t1, but not unconditionally systematic
+
+We do two step allocation: first allocate t1 optimally and then given this allocation we allocate t2. We do this many times to check that the probability of assignments are all correct for p2.
+
+```{r}
+runs2 <- replicate(sims, 1*(as.vector(prob_ra(prob))==2))
+```
+
+
+The result is much tighter than independent, but not as tight as possible:
+
+```{r}
+par(mfrow=c(1,2))
+indep <- replicate(sims,  sum(rbinom(length(p2), 1, p2)))
+hist(indep, main = "Total t2 allocation | indep") 
+hist(apply(runs2, 2, sum), main = "Total t2 allocation | scheme", xlim = range(indep))
+```
+
+
+## Similarly total selected in each bin is tight but not as tight as possible
+
+Ideally  max 1 unit between min and max
+
+```{r}
+bin_dist <- apply(runs2, 2, function(j) table(blocks, j)[,2])
+table_check <- t(rbind(apply(bin_dist, 1, function(j)  c(mean(j), min(j), max(j)))))
+colnames(table_check) <- c("sim_p", "min", "max")
+
+kable(round(cbind(size = table(blocks), true_p = aggregate(p2, by = list(blocks), FUN = sum)[,2], table_check), 2))
+```
+
+## But again the true probabilities preserved at unit level (and so also at block levels)
+
+```{r}
+plot(p2, apply(runs2, 1, mean), xlim = c(0,1), ylim = c(0,1))
+abline(0,1)
+```
+
+# Harder designs
+
+Multiple treatments and arms can be difficult sometimes. 
+
+"Neat" designs with no integer issues are handled easily:
+
+```{r}
+blocks <- rep(1:4, each = 4)
+prob <- matrix(.25, 16, 4)
+z <- prob_ra(blocks=blocks, prob = prob)
+table(blocks, z)
+```
+
+A hard example with a reasonable solution:
+
+```{r}
+prob <- rbind(c(2/3, 1/3, 0),
+           c( 0,  2/3, 1/3),
+           c( 1/3, 0,  2/3))
+prob <- rbind(prob,prob,prob,prob)
+blocks <- rep(1:2, each = 6)
+z <- prob_ra(blocks=blocks, prob = prob)
+table(z, blocks)
+```
+
+another hard one:
+
+```{r}
+prob <- t(replicate(12, c(.5, .25, .25)))
+blocks <- rep(1:4, each = 3)
+z <- prob_ra(blocks=blocks, prob = prob)
+table(z, blocks)
+```
+
+
+A harder case with suboptimal results and where ordering matters
+
+Here is a hard case with no blocks but multiple treatments. The issue is that optimality depends on the ordering of the blocks.
+
+Consider this:
+
+```{r}
+sims <- 10000
+prob <- t(matrix(c(.15,.65,.2, .47, .48, .05), 3,2))
+prob
+runs <- sapply(1:sims, function(j) prob_ra(prob = prob))
+round(sapply(1:3, function(j) apply(runs==j, 1, sum)), 2)/sims
+
+```
+
+Assignment probabilities are hard. But ideally there would be at least one unit in treatment 2 in each draw, but sometimes none here....
+
+```{r}
+set.seed(17)
+prob_ra(prob = prob)
+```
+
+Report the number in T2 in each draw:
+
+```{r}
+share_in_t2 <- table(apply(runs==2, 2, sum))/sims
+share_in_t2
+```
+This has too much diversity as seen here by the set of cases in which no unit is assigned to T2. Though it still produces the correct allocations on average:
+```{r}
+c(expectation = sum(prob[,2]), average = (share_in_t2%*%as.numeric(names(share_in_t2))))
+```
+
+Compare with this:
+
+```{r}
+prob <- prob[, c(2,1,3)]
+prob
+runs2 <- sapply(1:sims, function(j) prob_ra(prob = prob))
+round(sapply(1:3, function(j) apply(runs2==j, 1, mean)), 2)
+share_in_t1 <- table(apply(runs2==1, 2, sum))/sims
+share_in_t1
+c(expectation = sum(prob[,1]), average = (share_in_t1%*%as.numeric(names(share_in_t1))))
+```
+
+Note that in the first case the treatment is alternatively given to 1 or no units; in the second case it is given to 1 or 2 units. 
+
+So interestingly smart ordering can solve the problem.
+
+
+# Illustration of simple applications
+
+The function is general enough to do normal blocks an clusters (with a wrapper that supplies cluster information) though it's probably a lot slower than `randomizr` functions for standard designs.
+
+## Just $n$ provided 
+
+````{r}
+prob_ra(n = 4)
+```
+
+## Just blocks $blocks$  provided 
+
+Here a matched pair
+
+````{r}
+prob_ra(blocks=rep(1:5, each = 3))
+```
+
+## Just probability vector $prob$ provided
+
+```{r}
+prob_ra(prob = c(.4, .6))
+```
+
+
+## Treatment probabilities do not have to sum to 1
+
+Here probabilities for two treatments are provided and so there is an implicit residual category. The residual is assigned label 0.
+
+```{r}
+prob <- matrix(c(.25,.35,.4, .47, .48, .05), 3,2)
+prob
+```
+
+```{r}
+set.seed(2)
+prob_ra(prob = prob)
+```
+
+## Probabilities that *exceed* 1
+
+One can think of the probability vector as reporting the expected number of units rather than the probability. In this case the values can exceed 1. This is useful for example if one simply wanted to do the allocation across blocks and do the within block allocation is a second stage.
+
+```{r}
+prob_ra(prob =  c(1.2, .8, 2.1, .9))
+round(apply(replicate(2000, prob_ra(prob =  c(1.2, .8, 2.1, .9))), 1, mean),2)
+```
+
+

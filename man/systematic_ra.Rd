@@ -4,19 +4,39 @@
 \alias{systematic_ra}
 \title{systematic_ra function assigns units in ordered sequence}
 \usage{
-systematic_ra(p = 0.5, n = NULL)
+systematic_ra(prob = 0.5, n = NULL)
 }
 \arguments{
-\item{p}{assignment probability of length n}
+\item{prob}{assignment probability of length n}
 
 \item{n}{Number of units}
 
 \item{m}{Number of units to be assigned to treatment}
 }
 \description{
-Binary treatment assigned
+Usual use is to sample (or assign to a binary treatment) a set of units given possibly heterogeneous sampling (assignment) probabilities.
+Systematic sampling uses the ordering of units provided, takes an initial random starting point, and selects at fixed intervals over the list, with each unit selected according to its specified probability.
+For fully random assignment the order of lists should be randomized first, as done for example by \code{prob_ra}.
+In cases where probabilities exceed 1, all units are first assigned their "guaranteed" amounts and then residual amounts are randomized across units. This might be used for example for assigning
+targets to blocks rather than individuals to a treatment.
 }
 \examples{
-systematic_ra(n = 10)
-systematic_ra(p = c(.3, .4, .9))
+# Simple aaplication: note fixed gap between selected units
+systematic_ra(n = 20)
+systematic_ra(prob = rep(1/3, 20))
+systematic_ra(prob = rep(2/7, 20))
+
+# Nonuniform probabilities
+# For an assignment with prob = c(.3, .4, .9) we need
+# (a) individual assignments according to prob and
+# (b) the total number assigned should be either 1 or 2
+systematic_ra(prob = c(.3, .4, .9))
+reps <- replicate(1000, systematic_ra(prob = c(.3, .4, .9)))
+apply(reps, 1, mean)
+table(apply(reps, 2, sum))
+
+# Probabilities > 1 allowed
+systematic_ra(prob = c(.5, 1.5))
+reps <- replicate(500, systematic_ra(prob = c(.5, 1.5)))
+apply(reps, 1, mean)
 }

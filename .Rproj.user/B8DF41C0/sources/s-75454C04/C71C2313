@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1569837786070.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "C71C2313",
+    "lastKnownWriteTime" : 1569840101,
+    "last_content_update" : 1569840101073,
+    "path" : "C:/Dropbox/github/probra/R/systematic.R",
+    "project_path" : "R/systematic.R",
+    "properties" : {
+        "cursorPosition" : "20,0",
+        "scrollLine" : "6"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
