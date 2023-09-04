@@ -1,10 +1,10 @@
 ---
-title: "Systematic load balancing block randomization for arbitrary individual assignment probabilities"
+title: "Blocked assignment with heterogeneous probabilities"
 author: "Macartan Humphreys"
 date: "September 2019"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Put the title of your vignette here}
+  %\VignetteIndexEntry{Blocked assignment with heterogeneous probabilities}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---
@@ -22,9 +22,9 @@ Description of a randomization function that handles heterogeneous probabilities
 
 Two illustrations of functionality made possible with this function. 
 
-1: Jack and Jill have a race. Jill is faster than Jack and has a higher probability of winning. You want to simulate a distribution of wins. This is a situation where probabilites are heterogeneous and in which there is a target number of  units to  be selected. This problem is neither simple nor complete, as understood by `randomizr`.
+1. Jack and Jill have a race. Jill is faster than Jack and has a higher probability of winning. You want to simulate a distribution of wins. This is a situation where probabilites are heterogeneous and in which there is a target number of  units to  be selected. This problem is neither simple nor complete, as understood by `randomizr`.
 
-2: You have 2 districts with 3 villages each. You want to assign 3 villages to treatment, blocking by district, and with equal probabilities for all units. This randomization requires an allocation both across and within blocks.  More generally, the issues here is that the target number to be assigned in a given block is not an integer.
+2. You have 2 districts with 3 villages each. You want to assign 3 villages to treatment, blocking by district, and with equal probabilities for all units. This randomization requires an allocation both across and within blocks.  More generally, the issues here is that the target number to be assigned in a given block is not an integer.
 
 These problems can both occur in a given problem and indeed you would expect them to whenever there are generic probabilities and blocks.
 
@@ -33,9 +33,9 @@ These problems can both occur in a given problem and indeed you would expect the
 With random data:
 
 ```{r}
-s    <- 100
-prob    <- runif(s)
-blocks    <- sample(1:5, s, replace = TRUE, prob = 1:5)
+s <- 100
+prob <- runif(s)
+blocks <- sample(1:5, s, replace = TRUE, prob = 1:5)
 sims <- 10000
 runs <- replicate(sims, prob_ra(prob, blocks))
 ```
@@ -61,7 +61,10 @@ colnames(table_check) <- c("sim_p", "min", "max")
 
 
 ```{r}
-kable(round(cbind(size = table(blocks), true_p = aggregate(prob, by = list(blocks), FUN = sum)[,2], table_check), 2))
+cbind(size = table(blocks), 
+      true_p = aggregate(prob, by = list(blocks), FUN = sum)[,2], 
+      table_check) |>
+  kable(digits = 2)
 ```
 
 ## True assignment probabilities are respected at the lowest level
@@ -95,7 +98,7 @@ runs2 <- replicate(sims, 1*(as.vector(prob_ra(prob))==2))
 
 The result is much tighter than independent, but not as tight as possible:
 
-```{r}
+```{r, fig.width = 7, fig.height = 3}
 par(mfrow=c(1,2))
 indep <- replicate(sims,  sum(rbinom(length(p2), 1, p2)))
 hist(indep, main = "Total t2 allocation | indep") 
@@ -103,7 +106,7 @@ hist(apply(runs2, 2, sum), main = "Total t2 allocation | scheme", xlim = range(i
 ```
 
 
-## Similarly total selected in each bin is tight but not as tight as possible
+## Total selected in each bin is tight but not as tight as possible
 
 Ideally  max 1 unit between min and max
 
@@ -112,10 +115,13 @@ bin_dist <- apply(runs2, 2, function(j) table(blocks, j)[,2])
 table_check <- t(rbind(apply(bin_dist, 1, function(j)  c(mean(j), min(j), max(j)))))
 colnames(table_check) <- c("sim_p", "min", "max")
 
-kable(round(cbind(size = table(blocks), true_p = aggregate(p2, by = list(blocks), FUN = sum)[,2], table_check), 2))
+cbind(size = table(blocks), 
+      true_p = aggregate(p2, by = list(blocks), FUN = sum)[,2], 
+      table_check) |>
+  kable(digits = 2)
 ```
 
-## But again the true probabilities preserved at unit level (and so also at block levels)
+## But  the true probabilities preserved at unit level (and so also at block levels)
 
 ```{r}
 plot(p2, apply(runs2, 1, mean), xlim = c(0,1), ylim = c(0,1))
@@ -213,7 +219,7 @@ The function is general enough to do normal blocks an clusters (with a wrapper t
 
 ## Just $n$ provided 
 
-````{r}
+```{r}
 prob_ra(n = 4)
 ```
 
@@ -221,7 +227,7 @@ prob_ra(n = 4)
 
 Here a matched pair
 
-````{r}
+```{r}
 prob_ra(blocks=rep(1:5, each = 3))
 ```
 

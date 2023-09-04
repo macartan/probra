@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Macartan Humphreys" />
+
+
+<title>Blocked assignment with heterogeneous probabilities</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Blocked assignment with heterogeneous
+probabilities</h1>
+<h4 class="author">Macartan Humphreys</h4>
+<h4 class="date">September 2019</h4>
+
+
+
+<p>Description of a randomization function that handles heterogeneous
+probabilities and awkward integer blocks sizes.</p>
+<p>Two illustrations of functionality made possible with this
+function.</p>
+<ol style="list-style-type: decimal">
+<li><p>Jack and Jill have a race. Jill is faster than Jack and has a
+higher probability of winning. You want to simulate a distribution of
+wins. This is a situation where probabilites are heterogeneous and in
+which there is a target number of units to be selected. This problem is
+neither simple nor complete, as understood by
+<code>randomizr</code>.</p></li>
+<li><p>You have 2 districts with 3 villages each. You want to assign 3
+villages to treatment, blocking by district, and with equal
+probabilities for all units. This randomization requires an allocation
+both across and within blocks. More generally, the issues here is that
+the target number to be assigned in a given block is not an
+integer.</p></li>
+</ol>
+<p>These problems can both occur in a given problem and indeed you would
+expect them to whenever there are generic probabilities and blocks.</p>
+<div id="illustration-one-arm" class="section level1">
+<h1>Illustration: One arm</h1>
+<p>With random data:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>s <span class="ot">&lt;-</span> <span class="dv">100</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>prob <span class="ot">&lt;-</span> <span class="fu">runif</span>(s)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>blocks <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, s, <span class="at">replace =</span> <span class="cn">TRUE</span>, <span class="at">prob =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>sims <span class="ot">&lt;-</span> <span class="dv">10000</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>runs <span class="ot">&lt;-</span> <span class="fu">replicate</span>(sims, <span class="fu">prob_ra</span>(prob, blocks))</span></code></pre></div>
+<div id="total-selected-is-as-tight-as-possible" class="section level2">
+<h2>Total selected is as tight as possible</h2>
+<p>There should only be a unit difference between the totals assigned in
+any set of runs:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(<span class="fu">apply</span>(runs, <span class="dv">2</span>, sum))</span></code></pre></div>
+<pre><code>## 
+##   50   51 
+## 3296 6704</code></pre>
+</div>
+<div id="total-selected-in-each-block-is-also-as-tight-as-possible" class="section level2">
+<h2>Total selected <em>in each block</em> is also as tight as
+possible</h2>
+<p>Should be only max 1 unit between min and max</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>bin_dist <span class="ot">&lt;-</span> <span class="fu">apply</span>(runs, <span class="dv">2</span>, <span class="cf">function</span>(j) <span class="fu">table</span>(blocks, j)[,<span class="dv">2</span>])</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>table_check <span class="ot">&lt;-</span> <span class="fu">t</span>(<span class="fu">rbind</span>(<span class="fu">apply</span>(bin_dist, <span class="dv">1</span>, <span class="cf">function</span>(j)  <span class="fu">c</span>(<span class="fu">mean</span>(j), <span class="fu">min</span>(j), <span class="fu">max</span>(j)))))</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(table_check) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;sim_p&quot;</span>, <span class="st">&quot;min&quot;</span>, <span class="st">&quot;max&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cbind</span>(<span class="at">size =</span> <span class="fu">table</span>(blocks), </span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>      <span class="at">true_p =</span> <span class="fu">aggregate</span>(prob, <span class="at">by =</span> <span class="fu">list</span>(blocks), <span class="at">FUN =</span> sum)[,<span class="dv">2</span>], </span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>      table_check) <span class="sc">|&gt;</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>(<span class="at">digits =</span> <span class="dv">2</span>)</span></code></pre></div>
+<table>
+<thead>
+<tr class="header">
+<th align="right">size</th>
+<th align="right">true_p</th>
+<th align="right">sim_p</th>
+<th align="right">min</th>
+<th align="right">max</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">8</td>
+<td align="right">3.40</td>
+<td align="right">3.40</td>
+<td align="right">3</td>
+<td align="right">4</td>
+</tr>
+<tr class="even">
+<td align="right">12</td>
+<td align="right">6.66</td>
+<td align="right">6.66</td>
+<td align="right">6</td>
+<td align="right">7</td>
+</tr>
+<tr class="odd">
+<td align="right">20</td>
+<td align="right">11.00</td>
+<td align="right">11.00</td>
+<td align="right">10</td>
+<td align="right">11</td>
+</tr>
+<tr class="even">
+<td align="right">30</td>
+<td align="right">14.77</td>
+<td align="right">14.77</td>
+<td align="right">14</td>
+<td align="right">15</td>
+</tr>
+<tr class="odd">
+<td align="right">30</td>
+<td align="right">14.84</td>
+<td align="right">14.84</td>
+<td align="right">14</td>
+<td align="right">15</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="true-assignment-probabilities-are-respected-at-the-lowest-level" class="section level2">
+<h2>True assignment probabilities are respected at the lowest level</h2>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(prob, <span class="fu">apply</span>(runs, <span class="dv">1</span>, mean), <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>))</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="dv">0</span>,<span class="dv">1</span>)</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+</div>
+</div>
+<div id="illustration-multiple-arms" class="section level1">
+<h1>Illustration: Multiple arms</h1>
+<p>The function can also be used sequentially for multiple treatment. In
+this case it implements the based treatment in a <em>hierarchical</em>
+manner, which preserves individual probabilities, but prioritizes
+balancing by order.</p>
+<div id="multiple-treatments-illustration" class="section level2">
+<h2>Multiple Treatments Illustration</h2>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>s  <span class="ot">&lt;-</span> <span class="dv">100</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>blocks  <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, s, <span class="at">replace =</span> <span class="cn">TRUE</span>, <span class="at">prob =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> <span class="fu">runif</span>(s)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>p2 <span class="ot">&lt;-</span> <span class="fu">runif</span>(s)<span class="sc">*</span>(<span class="dv">1</span><span class="sc">-</span>p1)</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>prob <span class="ot">&lt;-</span> <span class="fu">cbind</span>(p1,p2)</span></code></pre></div>
+<p>Note that t2 will be systematic, like t1, <em>given</em> t1, but not
+unconditionally systematic</p>
+<p>We do two step allocation: first allocate t1 optimally and then given
+this allocation we allocate t2. We do this many times to check that the
+probability of assignments are all correct for p2.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>runs2 <span class="ot">&lt;-</span> <span class="fu">replicate</span>(sims, <span class="dv">1</span><span class="sc">*</span>(<span class="fu">as.vector</span>(<span class="fu">prob_ra</span>(prob))<span class="sc">==</span><span class="dv">2</span>))</span></code></pre></div>
+<p>The result is much tighter than independent, but not as tight as
+possible:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>indep <span class="ot">&lt;-</span> <span class="fu">replicate</span>(sims,  <span class="fu">sum</span>(<span class="fu">rbinom</span>(<span class="fu">length</span>(p2), <span class="dv">1</span>, p2)))</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(indep, <span class="at">main =</span> <span class="st">&quot;Total t2 allocation | indep&quot;</span>) </span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(<span class="fu">apply</span>(runs2, <span class="dv">2</span>, sum), <span class="at">main =</span> <span class="st">&quot;Total t2 allocation | scheme&quot;</span>, <span class="at">xlim =</span> <span class="fu">range</span>(indep))</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+</div>
+<div id="total-selected-in-each-bin-is-tight-but-not-as-tight-as-possible" class="section level2">
+<h2>Total selected in each bin is tight but not as tight as
+possible</h2>
+<p>Ideally max 1 unit between min and max</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>bin_dist <span class="ot">&lt;-</span> <span class="fu">apply</span>(runs2, <span class="dv">2</span>, <span class="cf">function</span>(j) <span class="fu">table</span>(blocks, j)[,<span class="dv">2</span>])</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>table_check <span class="ot">&lt;-</span> <span class="fu">t</span>(<span class="fu">rbind</span>(<span class="fu">apply</span>(bin_dist, <span class="dv">1</span>, <span class="cf">function</span>(j)  <span class="fu">c</span>(<span class="fu">mean</span>(j), <span class="fu">min</span>(j), <span class="fu">max</span>(j)))))</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(table_check) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;sim_p&quot;</span>, <span class="st">&quot;min&quot;</span>, <span class="st">&quot;max&quot;</span>)</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="fu">cbind</span>(<span class="at">size =</span> <span class="fu">table</span>(blocks), </span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>      <span class="at">true_p =</span> <span class="fu">aggregate</span>(p2, <span class="at">by =</span> <span class="fu">list</span>(blocks), <span class="at">FUN =</span> sum)[,<span class="dv">2</span>], </span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>      table_check) <span class="sc">|&gt;</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>(<span class="at">digits =</span> <span class="dv">2</span>)</span></code></pre></div>
+<table>
+<thead>
+<tr class="header">
+<th align="right">size</th>
+<th align="right">true_p</th>
+<th align="right">sim_p</th>
+<th align="right">min</th>
+<th align="right">max</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">3</td>
+<td align="right">0.11</td>
+<td align="right">0.11</td>
+<td align="right">0</td>
+<td align="right">2</td>
+</tr>
+<tr class="even">
+<td align="right">14</td>
+<td align="right">5.26</td>
+<td align="right">5.26</td>
+<td align="right">1</td>
+<td align="right">11</td>
+</tr>
+<tr class="odd">
+<td align="right">22</td>
+<td align="right">4.74</td>
+<td align="right">4.74</td>
+<td align="right">0</td>
+<td align="right">11</td>
+</tr>
+<tr class="even">
+<td align="right">28</td>
+<td align="right">6.54</td>
+<td align="right">6.55</td>
+<td align="right">1</td>
+<td align="right">14</td>
+</tr>
+<tr class="odd">
+<td align="right">33</td>
+<td align="right">7.39</td>
+<td align="right">7.39</td>
+<td align="right">1</td>
+<td align="right">14</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="but-the-true-probabilities-preserved-at-unit-level-and-so-also-at-block-levels" class="section level2">
+<h2>But the true probabilities preserved at unit level (and so also at
+block levels)</h2>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(p2, <span class="fu">apply</span>(runs2, <span class="dv">1</span>, mean), <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>))</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="dv">0</span>,<span class="dv">1</span>)</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+</div>
+</div>
+<div id="harder-designs" class="section level1">
+<h1>Harder designs</h1>
+<p>Multiple treatments and arms can be difficult sometimes.</p>
+<p>“Neat” designs with no integer issues are handled easily:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>blocks <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="at">each =</span> <span class="dv">4</span>)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>prob <span class="ot">&lt;-</span> <span class="fu">matrix</span>(.<span class="dv">25</span>, <span class="dv">16</span>, <span class="dv">4</span>)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>z <span class="ot">&lt;-</span> <span class="fu">prob_ra</span>(<span class="at">blocks=</span>blocks, <span class="at">prob =</span> prob)</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(blocks, z)</span></code></pre></div>
+<pre><code>##       z
+## blocks 1 2 3 4
+##      1 1 1 1 1
+##      2 1 1 1 1
+##      3 1 1 1 1
+##      4 1 1 1 1</code></pre>
+<p>A hard example with a reasonable solution:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>prob <span class="ot">&lt;-</span> <span class="fu">rbind</span>(<span class="fu">c</span>(<span class="dv">2</span><span class="sc">/</span><span class="dv">3</span>, <span class="dv">1</span><span class="sc">/</span><span class="dv">3</span>, <span class="dv">0</span>),</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>           <span class="fu">c</span>( <span class="dv">0</span>,  <span class="dv">2</span><span class="sc">/</span><span class="dv">3</span>, <span class="dv">1</span><span class="sc">/</span><span class="dv">3</span>),</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>           <span class="fu">c</span>( <span class="dv">1</span><span class="sc">/</span><span class="dv">3</span>, <span class="dv">0</span>,  <span class="dv">2</span><span class="sc">/</span><span class="dv">3</span>))</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>prob <span class="ot">&lt;-</span> <span class="fu">rbind</span>(prob,prob,prob,prob)</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>blocks <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>, <span class="at">each =</span> <span class="dv">6</span>)</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>z <span class="ot">&lt;-</span> <span class="fu">prob_ra</span>(<span class="at">blocks=</span>blocks, <span class="at">prob =</span> prob)</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(z, blocks)</span></code></pre></div>
+<pre><code>##    blocks
+## z   1 2
+##   1 2 2
+##   2 2 2
+##   3 2 2</code></pre>
+<p>another hard one:</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>prob <span class="ot">&lt;-</span> <span class="fu">t</span>(<span class="fu">replicate</span>(<span class="dv">12</span>, <span class="fu">c</span>(.<span class="dv">5</span>, .<span class="dv">25</span>, .<span class="dv">25</span>)))</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>blocks <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="at">each =</span> <span class="dv">3</span>)</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>z <span class="ot">&lt;-</span> <span class="fu">prob_ra</span>(<span class="at">blocks=</span>blocks, <span class="at">prob =</span> prob)</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(z, blocks)</span></code></pre></div>
+<pre><code>##    blocks
+## z   1 2 3 4
+##   1 2 1 1 2
+##   2 0 1 1 1
+##   3 1 1 1 0</code></pre>
+<p>A harder case with suboptimal results and where ordering matters</p>
+<p>Here is a hard case with no blocks but multiple treatments. The issue
+is that optimality depends on the ordering of the blocks.</p>
+<p>Consider this:</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>sims <span class="ot">&lt;-</span> <span class="dv">10000</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>prob <span class="ot">&lt;-</span> <span class="fu">t</span>(<span class="fu">matrix</span>(<span class="fu">c</span>(.<span class="dv">15</span>,.<span class="dv">65</span>,.<span class="dv">2</span>, .<span class="dv">47</span>, .<span class="dv">48</span>, .<span class="dv">05</span>), <span class="dv">3</span>,<span class="dv">2</span>))</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>prob</span></code></pre></div>
+<pre><code>##      [,1] [,2] [,3]
+## [1,] 0.15 0.65 0.20
+## [2,] 0.47 0.48 0.05</code></pre>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>runs <span class="ot">&lt;-</span> <span class="fu">sapply</span>(<span class="dv">1</span><span class="sc">:</span>sims, <span class="cf">function</span>(j) <span class="fu">prob_ra</span>(<span class="at">prob =</span> prob))</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">sapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="cf">function</span>(j) <span class="fu">apply</span>(runs<span class="sc">==</span>j, <span class="dv">1</span>, sum)), <span class="dv">2</span>)<span class="sc">/</span>sims</span></code></pre></div>
+<pre><code>##        [,1]   [,2]   [,3]
+## [1,] 0.1356 0.6600 0.2044
+## [2,] 0.4740 0.4787 0.0473</code></pre>
+<p>Assignment probabilities are hard. But ideally there would be at
+least one unit in treatment 2 in each draw, but sometimes none
+here….</p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">17</span>)</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="fu">prob_ra</span>(<span class="at">prob =</span> prob)</span></code></pre></div>
+<pre><code>##      [,1]
+## [1,]    3
+## [2,]    1</code></pre>
+<p>Report the number in T2 in each draw:</p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>share_in_t2 <span class="ot">&lt;-</span> <span class="fu">table</span>(<span class="fu">apply</span>(runs<span class="sc">==</span><span class="dv">2</span>, <span class="dv">2</span>, sum))<span class="sc">/</span>sims</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>share_in_t2</span></code></pre></div>
+<pre><code>## 
+##      0      1      2 
+## 0.1269 0.6075 0.2656</code></pre>
+<p>This has too much diversity as seen here by the set of cases in which
+no unit is assigned to T2. Though it still produces the correct
+allocations on average:</p>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">expectation =</span> <span class="fu">sum</span>(prob[,<span class="dv">2</span>]), <span class="at">average =</span> (share_in_t2<span class="sc">%*%</span><span class="fu">as.numeric</span>(<span class="fu">names</span>(share_in_t2))))</span></code></pre></div>
+<pre><code>## expectation     average 
+##      1.1300      1.1387</code></pre>
+<p>Compare with this:</p>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>prob <span class="ot">&lt;-</span> prob[, <span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">1</span>,<span class="dv">3</span>)]</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>prob</span></code></pre></div>
+<pre><code>##      [,1] [,2] [,3]
+## [1,] 0.65 0.15 0.20
+## [2,] 0.48 0.47 0.05</code></pre>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>runs2 <span class="ot">&lt;-</span> <span class="fu">sapply</span>(<span class="dv">1</span><span class="sc">:</span>sims, <span class="cf">function</span>(j) <span class="fu">prob_ra</span>(<span class="at">prob =</span> prob))</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">sapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="cf">function</span>(j) <span class="fu">apply</span>(runs2<span class="sc">==</span>j, <span class="dv">1</span>, mean)), <span class="dv">2</span>)</span></code></pre></div>
+<pre><code>##      [,1] [,2] [,3]
+## [1,] 0.65 0.16 0.20
+## [2,] 0.48 0.48 0.04</code></pre>
+<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>share_in_t1 <span class="ot">&lt;-</span> <span class="fu">table</span>(<span class="fu">apply</span>(runs2<span class="sc">==</span><span class="dv">1</span>, <span class="dv">2</span>, sum))<span class="sc">/</span>sims</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>share_in_t1</span></code></pre></div>
+<pre><code>## 
+##      1      2 
+## 0.8716 0.1284</code></pre>
+<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">expectation =</span> <span class="fu">sum</span>(prob[,<span class="dv">1</span>]), <span class="at">average =</span> (share_in_t1<span class="sc">%*%</span><span class="fu">as.numeric</span>(<span class="fu">names</span>(share_in_t1))))</span></code></pre></div>
+<pre><code>## expectation     average 
+##      1.1300      1.1284</code></pre>
+<p>Note that in the first case the treatment is alternatively given to 1
+or no units; in the second case it is given to 1 or 2 units.</p>
+<p>So interestingly smart ordering can solve the problem.</p>
+</div>
+<div id="illustration-of-simple-applications" class="section level1">
+<h1>Illustration of simple applications</h1>
+<p>The function is general enough to do normal blocks an clusters (with
+a wrapper that supplies cluster information) though it’s probably a lot
+slower than <code>randomizr</code> functions for standard designs.</p>
+<div id="just-n-provided" class="section level2">
+<h2>Just <span class="math inline">\(n\)</span> provided</h2>
+<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">prob_ra</span>(<span class="at">n =</span> <span class="dv">4</span>)</span></code></pre></div>
+<pre><code>## [1] 1 0 0 1</code></pre>
+</div>
+<div id="just-blocks-blocks-provided" class="section level2">
+<h2>Just blocks <span class="math inline">\(blocks\)</span>
+provided</h2>
+<p>Here a matched pair</p>
+<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">prob_ra</span>(<span class="at">blocks=</span><span class="fu">rep</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, <span class="at">each =</span> <span class="dv">3</span>))</span></code></pre></div>
+<pre><code>##  [1] 0 1 1 1 0 0 0 1 1 0 0 1 1 0 0</code></pre>
+</div>
+<div id="just-probability-vector-prob-provided" class="section level2">
+<h2>Just probability vector <span class="math inline">\(prob\)</span>
+provided</h2>
+<div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">prob_ra</span>(<span class="at">prob =</span> <span class="fu">c</span>(.<span class="dv">4</span>, .<span class="dv">6</span>))</span></code></pre></div>
+<pre><code>## [1] 0 1</code></pre>
+</div>
+<div id="treatment-probabilities-do-not-have-to-sum-to-1" class="section level2">
+<h2>Treatment probabilities do not have to sum to 1</h2>
+<p>Here probabilities for two treatments are provided and so there is an
+implicit residual category. The residual is assigned label 0.</p>
+<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>prob <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(.<span class="dv">25</span>,.<span class="dv">35</span>,.<span class="dv">4</span>, .<span class="dv">47</span>, .<span class="dv">48</span>, .<span class="dv">05</span>), <span class="dv">3</span>,<span class="dv">2</span>)</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>prob</span></code></pre></div>
+<pre><code>##      [,1] [,2]
+## [1,] 0.25 0.47
+## [2,] 0.35 0.48
+## [3,] 0.40 0.05</code></pre>
+<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2</span>)</span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a><span class="fu">prob_ra</span>(<span class="at">prob =</span> prob)</span></code></pre></div>
+<pre><code>##      [,1]
+## [1,]    0
+## [2,]    2
+## [3,]    1</code></pre>
+</div>
+<div id="probabilities-that-exceed-1" class="section level2">
+<h2>Probabilities that <em>exceed</em> 1</h2>
+<p>One can think of the probability vector as reporting the expected
+number of units rather than the probability. In this case the values can
+exceed 1. This is useful for example if one simply wanted to do the
+allocation across blocks and do the within block allocation is a second
+stage.</p>
+<div class="sourceCode" id="cb46"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="fu">prob_ra</span>(<span class="at">prob =</span>  <span class="fu">c</span>(<span class="fl">1.2</span>, .<span class="dv">8</span>, <span class="fl">2.1</span>, .<span class="dv">9</span>))</span></code></pre></div>
+<pre><code>## [1] 2 1 2 0</code></pre>
+<div class="sourceCode" id="cb48"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">apply</span>(<span class="fu">replicate</span>(<span class="dv">2000</span>, <span class="fu">prob_ra</span>(<span class="at">prob =</span>  <span class="fu">c</span>(<span class="fl">1.2</span>, .<span class="dv">8</span>, <span class="fl">2.1</span>, .<span class="dv">9</span>))), <span class="dv">1</span>, mean),<span class="dv">2</span>)</span></code></pre></div>
+<pre><code>## [1] 1.18 0.81 2.09 0.92</code></pre>
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

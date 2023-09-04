@@ -22,7 +22,8 @@ prob_ra(prob = 0.5, blocks = NULL, n = NULL, shuffle_blocks = TRUE,
 Complete random assignment with heterogeneous assignment probabilities and blocks.
 }
 \details{
-Possibly multivalued treatments assigned.
+User provides a scalar or vector of probabilities (for sampling or assignment of a single unit) or a n*k matrix of assignment probabilities for n units to k treatments, and, optionally, indicators of block membership.
+Assignment respects these probabilities with  minimal variance in the numbers assigned to a treatment. Though often achievable, minimal variance is not guaranteed for k>2. See vignette for more discussion.
 }
 \examples{
 prob_ra(n = 10)
