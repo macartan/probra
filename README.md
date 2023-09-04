@@ -7,4 +7,4 @@ the function can:
 * implement a form of complete random assignment with "load balancing" across blocks: for instance when there are 3 units in each of 2 blocks and exactly 3 have to be assigned to treatment
 
 
-  
+  Lots of illustrations here https://macartan.github.io/probra/
